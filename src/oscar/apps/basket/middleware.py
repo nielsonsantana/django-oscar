@@ -13,7 +13,7 @@ Selector = get_class('partner.strategy', 'Selector')
 selector = Selector()
 
 
-class BasketMiddleware:
+class BasketMiddleware(object):
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -60,6 +60,9 @@ class BasketMiddleware:
 
         response = self.get_response(request)
         return self.process_response(request, response)
+
+    def get_basket_model(self):
+        return Basket
 
     def process_response(self, request, response):
         # Delete any surplus cookies
@@ -129,6 +132,7 @@ class BasketMiddleware:
         if request._basket_cache is not None:
             return request._basket_cache
 
+        Basket = self.get_basket_model()
         num_baskets_merged = 0
         manager = Basket.open
         cookie_key = self.get_cookie_key(request)
@@ -191,6 +195,7 @@ class BasketMiddleware:
         If a cookie key is found with no matching basket, then we add
         it to the list to be deleted.
         """
+        Basket = self.get_basket_model()
         basket = None
         if cookie_key in request.COOKIES:
             basket_hash = request.COOKIES[cookie_key]
